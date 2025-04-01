@@ -12,21 +12,16 @@ import {
 } from 'firebase/firestore';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const allHours = [
-  '00:00-01:00', '01:00-02:00', '02:00-03:00', '03:00-04:00', '04:00-05:00',
-  '05:00-06:00', '06:00-07:00', '07:00-08:00', '08:00-09:00', '09:00-10:00',
-  '10:00-11:00', '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00',
-  '15:00-16:00', '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00',
-  '20:00-21:00', '21:00-22:00', '22:00-23:00', '23:00-00:00'
+const hours = [
+  '03:00-04:00', '04:00-05:00', '05:00-06:00', '06:00-07:00', '07:00-08:00',
+  '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00',
+  '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00',
+  '18:00-19:00', '19:00-20:00', '20:00-21:00'
 ];
 
 
 // ...imports
 const WeeklySchedule = () => {
-  const [startTime, setStartTime] = useState('03:00-04:00');
-  const [endTime, setEndTime] = useState('21:00-22:00');
-  const [hours, setHours] = useState([]);
-  const [showSettings, setShowSettings] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({ content: '', day: 'Monday', hour: '10:00-11:00', duration: 1 });
   const [selectedTaskId, setSelectedTaskId] = useState(null);
@@ -48,14 +43,6 @@ const WeeklySchedule = () => {
     });
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    const startIndex = allHours.findIndex(h => h === startTime);
-    const endIndex = allHours.findIndex(h => h === endTime);
-    const sliced = allHours.slice(startIndex, endIndex + 1);
-    setHours(sliced);
-  }, [startTime, endTime]);
-
   const loadTasks = async (uid) => {
     try {
       const docRef = doc(db, 'schedules', uid);
@@ -68,7 +55,6 @@ const WeeklySchedule = () => {
     } catch (error) {
       console.error("Error loading tasks:", error);
     }
-    
   };
   const saveTasks = async (uid, taskList) => {
     try {
@@ -234,31 +220,6 @@ const WeeklySchedule = () => {
               <button className="btn blue" onClick={addTask}>➕ Add</button>
             )}
           </div>
-        </div>
-        <div className="chart-settings">
-          <button className="btn gray" onClick={() => setShowSettings(!showSettings)}>
-            Chart Settings ⚙️
-          </button>
-
-          {showSettings && (
-            <div className="chart-settings-panel">
-              <label>Start Time:</label>
-              <select value={startTime} onChange={(e) => setStartTime(e.target.value)}>
-                {allHours.map(hour => (
-                  <option key={hour} value={hour}>{hour}</option>
-                ))}
-              </select>
-
-              <label>End Time:</label>
-              <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
-                {allHours.map(hour => (
-                  <option key={hour} value={hour}>{hour}</option>
-                ))}
-              </select>
-
-              <button className="btn blue" onClick={() => setShowSettings(false)}>Apply</button>
-            </div>
-          )}
         </div>
 
         <div className="schedule-grid-wrapper">

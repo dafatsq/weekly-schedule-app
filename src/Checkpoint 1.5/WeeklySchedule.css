@@ -180,7 +180,7 @@
     padding: 1.5rem;
     border-radius: 0.75rem;
     max-width: 800px;
-    margin: 1rem auto 1rem;
+    margin: 1rem auto 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border: 1px solid #e5e7eb;
   }
@@ -333,7 +333,6 @@
   border: none;
   color: #2563eb;
   font-weight: 500;
-  font-size : 1rem;
   cursor: pointer;
 }
 
@@ -398,41 +397,4 @@
 
 .logout-button:hover {
   background: #dc2626;
-}
-
-.auth-error {
-  color: #dc2626;
-  font-size: 0.9rem;
-  font-weight: 400;
-  margin-top: 10px;
-}
-.chart-settings {
-  margin-bottom: 1rem;
-}
-
-.chart-settings .btn {
-  font-size: 0.9rem;
-  background-color: #2563eb;
-}
-
-.chart-settings-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  background: #f3f4f6;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.chart-settings-panel label {
-  font-weight: 500;
-  margin-right: 6px;
-}
-
-.chart-settings-panel select {
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
 }

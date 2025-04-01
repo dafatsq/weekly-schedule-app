@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "firebase": "^11.6.0",
     "react": "^19.0.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^19.0.0",
@@ -43,5 +44,4 @@
   "devDependencies": {
     "gh-pages": "^6.3.0"
   }
-
 }

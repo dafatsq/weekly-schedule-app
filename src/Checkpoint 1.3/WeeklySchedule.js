@@ -89,7 +89,7 @@ const WeeklySchedule = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="weekly-schedule-wrapper">
-        <h1 className="schedule-title">🗓 My Weekly Schedule</h1>
+        <h1 className="schedule-title">🗓 Weekly Schedule App</h1>
 
         <div className="form-card">
           <h3>{selectedTask ? 'Edit Selected Task' : 'Add a Schedule'}</h3>
