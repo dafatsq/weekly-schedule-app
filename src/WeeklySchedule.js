@@ -5,7 +5,6 @@ import { auth } from './firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
 import { db } from './firebase';
 import {
-  collection,
   doc,
   getDoc,
   setDoc
@@ -20,11 +19,11 @@ const allHours = [
   '20:00-21:00', '21:00-22:00', '22:00-23:00', '23:00-00:00'
 ];
 
-
-// ...imports
-const WeeklySchedule = () => {
-  const [startTime, setStartTime] = useState('03:00-04:00');
+function WeeklySchedule() {
+  const [startTime, setStartTime] = useState('03:00-04:00'); 
   const [endTime, setEndTime] = useState('21:00-22:00');
+  const [tempStartTime, setTempStartTime] = useState(startTime); 
+  const [tempEndTime, setTempEndTime] = useState(endTime);  
   const [hours, setHours] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
   const [tasks, setTasks] = useState([]);
@@ -38,135 +37,304 @@ const WeeklySchedule = () => {
   const [authPassword, setAuthPassword] = useState('');
   const [user, setUser] = useState(null);
   const [authError, setAuthError] = useState('');
+  const [chartError, setChartError] = useState('');
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode === 'true';
+  });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const checkUserStatus = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         loadTasks(currentUser.uid);
       }
     });
-    return () => unsubscribe();
+    
+    return () => checkUserStatus();
   }, []);
 
   useEffect(() => {
-    const startIndex = allHours.findIndex(h => h === startTime);
-    const endIndex = allHours.findIndex(h => h === endTime);
-    const sliced = allHours.slice(startIndex, endIndex + 1);
-    setHours(sliced);
+    const startIndex = allHours.findIndex(hour => hour === startTime);
+    const endIndex = allHours.findIndex(hour => hour === endTime);
+    const visibleHours = allHours.slice(startIndex, endIndex + 1);
+    setHours(visibleHours);
   }, [startTime, endTime]);
 
-  const loadTasks = async (uid) => {
+  useEffect(() => {
+    if (selectedTaskId) {
+      const foundTask = tasks.find(task => task.id === selectedTaskId);
+      if (foundTask) {
+        setEditText(foundTask.content);
+        setEditDuration(foundTask.duration || 1);
+      }
+    }
+  }, [selectedTaskId, tasks]);
+  
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
+  function toggleDarkMode() {
+    setDarkMode(prevMode => {
+      const newMode = !prevMode;
+      localStorage.setItem('darkMode', newMode);
+      return newMode;
+    });
+  }
+
+  async function loadTasks(userId) {
     try {
-      const docRef = doc(db, 'schedules', uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setTasks(docSnap.data().tasks);
+      const userDocRef = doc(db, 'schedules', userId);
+      const userDocData = await getDoc(userDocRef);
+      
+      if (userDocData.exists()) {
+        const userData = userDocData.data();
+        setTasks(userData.tasks || []);
+        
+        if (userData.chartStart) {
+          setStartTime(userData.chartStart);
+          setTempStartTime(userData.chartStart);
+        }
+        
+        if (userData.chartEnd) {
+          setEndTime(userData.chartEnd);
+          setTempEndTime(userData.chartEnd);
+        }
       } else {
         setTasks([]);
       }
     } catch (error) {
       console.error("Error loading tasks:", error);
     }
-    
-  };
-  const saveTasks = async (uid, taskList) => {
+  }
+  
+  async function saveTasks(userId, taskList, chartStartTime = startTime, chartEndTime = endTime) {
     try {
-      await setDoc(doc(db, 'schedules', uid), {
-        tasks: taskList
+      const userDocRef = doc(db, 'schedules', userId);
+      await setDoc(userDocRef, {
+        tasks: taskList,
+        chartStart: chartStartTime,
+        chartEnd: chartEndTime
       });
     } catch (error) {
       console.error("Error saving tasks:", error);
     }
-  };
+  }  
   
-  const onDragEnd = (result) => {
+  function handleDragEnd(result) {
     const { source, destination, draggableId } = result;
-    if (!destination) return;
-    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
-  
-    const draggedTask = tasks.find((task) => task.id === draggableId);
-    const [day, hour] = destination.droppableId.split('_');
     
-    // Check if there's enough space for the multi-hour task
-    const hourIndex = hours.indexOf(hour);
-    const requiredSpace = draggedTask.duration || 1;
-    if (hourIndex + requiredSpace > hours.length) {
-      // Not enough space at the end of the day
+    if (!destination) {
       return;
     }
     
-    const updatedTask = { ...draggedTask, day, hour };
-    const newTasks = tasks.filter((task) => task.id !== draggableId).concat(updatedTask);
-    setTasks(newTasks);
-    if (user) saveTasks(user.uid, newTasks);    
-  };
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+  
+    const taskBeingDragged = tasks.find(task => task.id === draggableId);
+    const [newDay, newHour] = destination.droppableId.split('_');
+    
+    const hourIndex = hours.indexOf(newHour);
+    const taskDuration = taskBeingDragged.duration || 1;
+    
+    if (hourIndex + taskDuration > hours.length) {
+      return;
+    }
+    
+    const updatedTask = {
+      ...taskBeingDragged,
+      day: newDay,
+      hour: newHour
+    };
+    
+    const updatedTasks = tasks.filter(task => task.id !== draggableId);
+    updatedTasks.push(updatedTask);
+    
+    setTasks(updatedTasks);
+    
+    if (user) {
+      saveTasks(user.uid, updatedTasks);
+    }
+  }
 
-  const getTasks = (day, hour) => {
-    return tasks.filter((task) => {
-      if (task.day !== day) return false;
+  function getTasksForCell(day, hour) {
+    const tasksInCell = [];
+    
+    for (let i = 0; i < tasks.length; i++) {
+      const task = tasks[i];
       
-      // Get the starting hour index
-      const startHourIndex = hours.indexOf(task.hour);
-      // Get the current hour index
+      if (task.day !== day) {
+        continue;
+      }
+      
+      const taskStartHourIndex = hours.indexOf(task.hour);
       const currentHourIndex = hours.indexOf(hour);
+      const taskDuration = task.duration || 1;
       
-      // Check if the current hour is within the task's duration
-      return currentHourIndex >= startHourIndex && 
-             currentHourIndex < startHourIndex + (task.duration || 1);
-    });
-  };
+      const isHourWithinTaskDuration = (
+        currentHourIndex >= taskStartHourIndex && 
+        currentHourIndex < taskStartHourIndex + taskDuration
+      );
+      
+      if (isHourWithinTaskDuration) {
+        tasksInCell.push(task);
+      }
+    }
+    
+    return tasksInCell;
+  }
 
-  const addTask = () => {
-    if (!newTask.content.trim()) return;
-    const id = `task-${Date.now()}`;
-    const updatedTaskList = [...tasks, { id, ...newTask }];
+  function addNewTask() {
+    if (!newTask.content.trim()) {
+      return;
+    }
+    
+    const taskId = `task-${Date.now()}`;
+    const taskToAdd = { 
+      id: taskId,
+      content: newTask.content,
+      day: newTask.day,
+      hour: newTask.hour,
+      duration: newTask.duration
+    };
+    
+    const updatedTaskList = [...tasks, taskToAdd];
     setTasks(updatedTaskList);
-    if (user) saveTasks(user.uid, updatedTaskList);    
+    
+    if (user) {
+      saveTasks(user.uid, updatedTaskList);
+    }
+    
     setNewTask({ content: '', day: 'Monday', hour: '10:00-11:00', duration: 1 });
-  };
+  }
 
-  const deleteTask = () => {
-    const updatedTaskList = tasks.filter(task => task.id !== selectedTaskId);
-    setTasks(updatedTaskList);
-    if (user) saveTasks(user.uid, updatedTaskList);    
+  function deleteSelectedTask() {
+    const filteredTasks = tasks.filter(task => task.id !== selectedTaskId);
+    setTasks(filteredTasks);
+    
+    if (user) {
+      saveTasks(user.uid, filteredTasks);
+    }
+    
     setSelectedTaskId(null);
     setEditText('');
-  };
+  }
 
-  const updateTask = () => {
-    const updatedTaskList = tasks.map((task) =>
-      task.id === selectedTaskId
-        ? {
-            ...task,
-            content: editText.trim() !== '' ? editText : task.content,
-            duration: editDuration
-          }
-        : task
-    );
+  function updateSelectedTask() {
+    const updatedTaskList = tasks.map(task => {
+      if (task.id === selectedTaskId) {
+        const updatedTask = {
+          ...task,
+          duration: editDuration
+        };
+        
+        if (editText.trim() !== '') {
+          updatedTask.content = editText;
+        }
+        
+        return updatedTask;
+      }
+      return task;
+    });
+    
     setTasks(updatedTaskList);
-    if (user) saveTasks(user.uid, updatedTaskList);    
+    
+    if (user) {
+      saveTasks(user.uid, updatedTaskList);
+    }
+    
     setSelectedTaskId(null);
     setEditText('');
     setEditDuration(1);
-  };
+  }
+
+  function cancelTaskEdit() {
+    setSelectedTaskId(null);
+    setEditText('');
+    setEditDuration(1);
+  }
+  
+  async function handleAuthAction() {
+    try {
+      if (!isLoginMode && authPassword.length < 8) {
+        setAuthError('Password must be at least 8 characters long.');
+        return;
+      }
+      
+      if (isLoginMode) {
+        await signInWithEmailAndPassword(auth, authEmail, authPassword);
+      } else {
+        await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+      }
+      
+      setShowAuthModal(false);
+      setAuthError('');
+      
+    } catch (error) {
+      const errorCode = error.code;
+      let friendlyMessage = 'An error occurred. Please try again.';
+      
+      if (errorCode === 'auth/invalid-credential') {
+        friendlyMessage = 'Invalid Credentials.';
+      } else if (errorCode === 'auth/invalid-email') {
+        friendlyMessage = 'Please enter a valid email address.';
+      } else if (errorCode === 'auth/email-already-in-use') {
+        friendlyMessage = 'This email is already registered.';
+      } else if (errorCode === 'auth/weak-password') {
+        friendlyMessage = 'Password is too weak. Please use at least 8 characters.';
+      }
+      
+      setAuthError(friendlyMessage);
+    }
+  }
+
+  function applyTimeSettings() {
+    const startIndex = allHours.indexOf(tempStartTime);
+    const endIndex = allHours.indexOf(tempEndTime);
+    
+    if (startIndex >= endIndex) {
+      setChartError('Start time must be earlier than end time.');
+      return;
+    }
+    
+    if (tasks.length > 0) {
+      setChartError('Please clear your schedule before changing the chart time range.');
+      return;
+    }
+    
+    setStartTime(tempStartTime);
+    setEndTime(tempEndTime);
+    setShowSettings(false);
+    setChartError('');
+    
+    if (user) {
+      saveTasks(user.uid, tasks, tempStartTime, tempEndTime);
+    }
+  }
+
   const selectedTask = tasks.find(task => task.id === selectedTaskId);
   
-  React.useEffect(() => {
-    if (selectedTask) {
-      setEditDuration(selectedTask.duration || 1);
-    }
-  }, [selectedTask]);
-  
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <DragDropContext onDragEnd={handleDragEnd}>
       <div className="weekly-schedule-wrapper">
         <h1 className="schedule-title">🗓 Weekly Schedule App</h1>
+        
+        <button className="dark-mode-button" onClick={toggleDarkMode}>
+          {darkMode ? '☀️ Light' : '🌙 Dark'}
+        </button>
+        
         {!user && (
           <button className="login-button" onClick={() => setShowAuthModal(true)}>
             Login
           </button>
         )}
+        
         {user && (
           <div className="auth-top-right">
             <span className="user-email">👤 {user.email}</span>
@@ -176,65 +344,80 @@ const WeeklySchedule = () => {
 
         <div className="form-card">
           <h3>{selectedTask ? 'Edit Selected Task' : 'Add a Schedule'}</h3>
+          
           <div className="form-controls">
             <input
               type="text"
               placeholder="Task name"
               value={selectedTask ? editText : newTask.content}
               onChange={(e) => {
-                selectedTask
-                  ? setEditText(e.target.value)
-                  : setNewTask({ ...newTask, content: e.target.value });
+                if (selectedTask) {
+                  setEditText(e.target.value);
+                } else {
+                  setNewTask({ ...newTask, content: e.target.value });
+                }
               }}
             />
+            
             <select
               value={selectedTask ? selectedTask.day : newTask.day}
               onChange={(e) => {
-                if (selectedTask) return;
-                setNewTask({ ...newTask, day: e.target.value });
+                if (!selectedTask) {
+                  setNewTask({ ...newTask, day: e.target.value });
+                }
               }}
               disabled={selectedTask}
             >
-              {days.map(day => <option key={day} value={day}>{day}</option>)}
+              {days.map(day => (
+                <option key={day} value={day}>{day}</option>
+              ))}
             </select>
+            
             <select
               value={selectedTask ? selectedTask.hour : newTask.hour}
               onChange={(e) => {
-                if (selectedTask) return;
-                setNewTask({ ...newTask, hour: e.target.value });
+                if (!selectedTask) {
+                  setNewTask({ ...newTask, hour: e.target.value });
+                }
               }}
               disabled={selectedTask}
             >
-              {hours.map(hour => <option key={hour} value={hour}>{hour}</option>)}
+              {hours.map(hour => (
+                <option key={hour} value={hour}>{hour}</option>
+              ))}
             </select>
+            
             <select
               value={selectedTask ? editDuration : newTask.duration}
               onChange={(e) => {
-                const value = parseInt(e.target.value);
+                const durationValue = parseInt(e.target.value);
+                
                 if (selectedTask) {
-                  setEditDuration(value);
+                  setEditDuration(durationValue);
                 } else {
-                  setNewTask({ ...newTask, duration: value });
+                  setNewTask({ ...newTask, duration: durationValue });
                 }
               }}
             >
-              {[1, 2, 3, 4].map(num => <option key={num} value={num}>{num} hour{num > 1 ? 's' : ''}</option>)}
+              {[1, 2, 3, 4].map(num => (
+                <option key={num} value={num}>
+                  {num} hour{num > 1 ? 's' : ''}
+                </option>
+              ))}
             </select>
+            
             {selectedTask ? (
               <>
-                <button className="btn green" onClick={updateTask}>✅ Save</button>
-                <button className="btn red" onClick={deleteTask}>🗑️ Delete</button>
-                <button className="btn gray" onClick={() => {
-                  setSelectedTaskId(null);
-                  setEditText('');
-                  setEditDuration(1);
-                }}>❌ Cancel</button>
+                <button className="btn green" onClick={updateSelectedTask}>✅ Save</button>
+                <button className="btn red" onClick={deleteSelectedTask}>🗑️ Delete</button>
+                <button className="btn gray" onClick={cancelTaskEdit}>❌ Cancel</button>
               </>
             ) : (
-              <button className="btn blue" onClick={addTask}>➕ Add</button>
+              <button className="btn blue" onClick={addNewTask}>➕ Add</button>
             )}
           </div>
         </div>
+        
         <div className="chart-settings">
           <button className="btn gray" onClick={() => setShowSettings(!showSettings)}>
             Chart Settings ⚙️
@@ -242,21 +425,40 @@ const WeeklySchedule = () => {
 
           {showSettings && (
             <div className="chart-settings-panel">
-              <label>Start Time:</label>
-              <select value={startTime} onChange={(e) => setStartTime(e.target.value)}>
-                {allHours.map(hour => (
-                  <option key={hour} value={hour}>{hour}</option>
-                ))}
-              </select>
+              <div className="time-setting-controls">
+                <div className="time-setting-group">
+                  <label>Start Time:</label>
+                  <select 
+                    value={tempStartTime} 
+                    onChange={(e) => setTempStartTime(e.target.value)}
+                  >
+                    {allHours.map(hour => (
+                      <option key={hour} value={hour}>{hour}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <label>End Time:</label>
-              <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
-                {allHours.map(hour => (
-                  <option key={hour} value={hour}>{hour}</option>
-                ))}
-              </select>
+                <div className="time-setting-group">
+                  <label>End Time:</label>
+                  <select 
+                    value={tempEndTime} 
+                    onChange={(e) => setTempEndTime(e.target.value)}
+                  >
+                    {allHours.map(hour => (
+                      <option key={hour} value={hour}>{hour}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <button className="btn blue" onClick={() => setShowSettings(false)}>Apply</button>
+                <button
+                  className="btn blue"
+                  onClick={applyTimeSettings}
+                >
+                  Apply
+                </button>
+              </div>
+              
+              {chartError && <p className="chart-error">{chartError}</p>}
             </div>
           )}
         </div>
@@ -264,12 +466,15 @@ const WeeklySchedule = () => {
         <div className="schedule-grid-wrapper">
           <div className="schedule-grid">
             <div className="schedule-header">Time</div>
+            
             {days.map(day => (
               <div key={day} className="schedule-header">{day}</div>
             ))}
+            
             {hours.map(hour => (
               <React.Fragment key={hour}>
                 <div className="schedule-label">{hour}</div>
+                
                 {days.map(day => (
                   <Droppable droppableId={`${day}_${hour}`} key={`${day}_${hour}`}>
                     {(provided) => (
@@ -278,37 +483,56 @@ const WeeklySchedule = () => {
                         {...provided.droppableProps}
                         className="schedule-cell"
                       >
-                        {getTasks(day, hour).map((task, index) => {
+                        {getTasksForCell(day, hour).map((task, index) => {
                           const isStartingHour = task.hour === hour;
                           
-                          return isStartingHour ? (
-                            <Draggable draggableId={task.id} index={index} key={task.id}>
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`schedule-task ${selectedTaskId === task.id ? 'selected' : ''}`}
-                                  onClick={() =>
-                                    setSelectedTaskId(task.id === selectedTaskId ? null : task.id)
+                          if (isStartingHour) {
+                            return (
+                              <Draggable 
+                                draggableId={task.id} 
+                                index={index} 
+                                key={task.id}
+                              >
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={`schedule-task ${selectedTaskId === task.id ? 'selected' : ''}`}
+                                    onClick={() => {
+                                      if (selectedTaskId === task.id) {
+                                        setSelectedTaskId(null);
+                                      } else {
+                                        setSelectedTaskId(task.id);
+                                      }
+                                    }}
+                                  >
+                                    {task.content}
+                                    {task.duration > 1 && (
+                                      <span className="task-duration"> ({task.duration} hrs)</span>
+                                    )}
+                                  </div>
+                                )}
+                              </Draggable>
+                            );
+                          } else {
+                            return (
+                              <div 
+                                key={`${task.id}-continuation-${hour}`}
+                                className={`schedule-task continuation ${selectedTaskId === task.id ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (selectedTaskId === task.id) {
+                                    setSelectedTaskId(null);
+                                  } else {
+                                    setSelectedTaskId(task.id);
                                   }
-                                >
-                                  {task.content}
-                                  {task.duration > 1 && <span className="task-duration"> ({task.duration} hrs)</span>}
-                                </div>
-                              )}
-                            </Draggable>
-                          ) : (
-                            // Non-draggable continuation marker
-                            <div 
-                              key={`${task.id}-continuation-${hour}`}
-                              className={`schedule-task continuation ${selectedTaskId === task.id ? 'selected' : ''}`}
-                              onClick={() => setSelectedTaskId(task.id === selectedTaskId ? null : task.id)}
-                            >
-                              {task.content}
-                              <span className="continued-marker">↑</span>
-                            </div>
-                          );
+                                }}
+                              >
+                                {task.content}
+                                <span className="continued-marker">↑</span>
+                              </div>
+                            );
+                          }
                         })}
                         {provided.placeholder}
                       </div>
@@ -320,49 +544,38 @@ const WeeklySchedule = () => {
           </div>
         </div>
       </div>
+      
       {showAuthModal && (
         <div className="auth-modal-overlay">
           <div className="auth-modal">
-            <button className="auth-close" onClick={() => setShowAuthModal(false)}>X</button>
+            <button 
+              className="auth-close" 
+              onClick={() => setShowAuthModal(false)}
+            >
+              X
+            </button>
+            
             <h2>{isLoginMode ? 'Login' : 'Register'}</h2>
+            
             <input
               type="email"
               placeholder="Email"
               value={authEmail}
               onChange={(e) => setAuthEmail(e.target.value)}
             />
+            
             <input
               type="password"
               placeholder="Password"
               value={authPassword}
               onChange={(e) => setAuthPassword(e.target.value)}
             />
+            
             {authError && <p className="auth-error">{authError}</p>}
+            
             <button
               className="btn blue"
-              onClick={async () => {
-                try {
-                  if (isLoginMode) {
-                    await signInWithEmailAndPassword(auth, authEmail, authPassword);
-                  } else {
-                    await createUserWithEmailAndPassword(auth, authEmail, authPassword);
-                  }
-                  setShowAuthModal(false);
-                  setAuthError('');
-                } catch (error) {
-                  setAuthError(error.message);
-                  const errorCode = error.code;
-                  let friendlyMessage = 'An error occurred. Please try again.';
-                  if (errorCode === 'auth/invalid-credential') {
-                    friendlyMessage = 'Invalid Credentials.';
-                  } else if (errorCode === 'auth/invalid-email') {
-                    friendlyMessage = 'Please enter a valid email address.';
-                  } else if (errorCode === 'auth/email-already-in-use') {
-                    friendlyMessage = 'This email is already registered.';
-                  } 
-                  setAuthError(friendlyMessage);
-                }
-              }}
+              onClick={handleAuthAction}
             >
               {isLoginMode ? 'Login' : 'Register'}
             </button>
@@ -381,6 +594,6 @@ const WeeklySchedule = () => {
       )}
     </DragDropContext>
   );
-};
+}
 
 export default WeeklySchedule;
