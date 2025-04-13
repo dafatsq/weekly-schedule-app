@@ -512,11 +512,11 @@ function WeeklySchedule() {
             {showProfileDropdown && (
               <div className="profile-dropdown">
                 <div className="profile-header">
-                  <img 
+                  {/* <img 
                     src={profilePicture || `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=random`} 
                     alt="Profile" 
                     className="profile-dropdown-avatar" 
-                  />
+                  /> */}
                   <div className="profile-info">
                     <span className="profile-email">{user.email}</span>
                   </div>

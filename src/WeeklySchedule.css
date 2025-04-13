@@ -482,23 +482,25 @@
 
 .profile-header {
   padding: 15px;
+  padding-left: 22px;
   display: flex;
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
   background-color: #f9fafb;
 }
 
-.profile-dropdown-avatar {
+/* .profile-dropdown-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 12px;
-}
+} */
 
 .profile-info {
   display: flex;
   flex-direction: column;
+  text-align: center;
 }
 
 .profile-email {
