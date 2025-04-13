@@ -1,70 +1,101 @@
-# Getting Started with Create React App
+# Weekly Schedule App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A dynamic web application for creating and managing your weekly schedule with a user-friendly drag-and-drop interface.
 
-## Available Scripts
+![Weekly Schedule App Screenshot](https://drive.google.com/file/d/1by6Gjgr2pcmRlNzYPjzdJXFIAAFYxQbD/view?usp=drive_link)
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **Interactive Schedule Grid**: Visualize your week with an easy-to-read grid layout
+- **Drag & Drop Tasks**: Easily move tasks between different days and times
+- **Task Duration**: Set tasks to span multiple hours with visual continuity
+- **Customizable Time Range**: Configure which hours appear in your schedule
+- **User Authentication**: Securely save your schedule with user accounts
+- **Responsive Design**: Works well on both desktop and mobile devices
+- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
+- **User Profiles**: Upload and manage profile pictures
+- **Cloud Saving**: All your schedules are synced to the cloud automatically
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technologies Used
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- React.js
+- Firebase Authentication
+- Firestore Database
+- React Beautiful DnD
+- CSS3 with responsive design
 
-### `npm test`
+## Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository:
+   ```
+   git clone https://github.com/dafatsq/weekly-schedule-app.git
+   cd weekly-schedule
+   ```
 
-### `npm run build`
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Create a Firebase project and enable Authentication and Firestore:
+   - Visit [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project
+   - Enable Email/Password authentication
+   - Create a Firestore database in production mode
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. Create a `.env` file in the root directory with your Firebase config:
+   ```
+   REACT_APP_FIREBASE_API_KEY=your-api-key
+   REACT_APP_FIREBASE_AUTH_DOMAIN=your-auth-domain
+   REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+   REACT_APP_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+   REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+   REACT_APP_FIREBASE_APP_ID=your-app-id
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+5. Start the development server:
+   ```
+   npm start
+   ```
 
-### `npm run eject`
+## Usage
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **Create an account** or log in to an existing one
+2. **Add tasks** to your schedule by filling out the form at the top
+3. **Drag and drop** tasks to rearrange them on the schedule
+4. **Edit tasks** by clicking on them and using the edit form
+5. **Adjust the time range** shown using the Chart Settings
+6. **Upload a profile picture** by clicking on your profile avatar
+7. **Toggle dark mode** using the button in the sidebar
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Configuration Options
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Time Settings
+You can customize which hours are shown on your schedule grid by using the Chart Settings panel. This allows you to focus on specific parts of the day.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Task Duration
+When creating or editing a task, you can set its duration from 1 to 4 hours. The task will visually span across multiple time slots.
 
-## Learn More
+## Data Structure
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The app uses Firebase Firestore with the following structure:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `schedules/{userId}` - Contains user's tasks and chart settings
+  - `tasks` - Array of task objects
+  - `chartStart` - Starting time setting
+  - `chartEnd` - Ending time setting
 
-### Code Splitting
+- `users/{userId}` - Contains user profile data
+  - `profilePicture` - Base64 encoded profile image
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Browser Support
 
-### Analyzing the Bundle Size
+The app works best in modern browsers (Chrome, Firefox, Safari, Edge).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## License
 
-### Making a Progressive Web App
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Contributing
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Contributions are welcome! Please feel free to submit a Pull Request.
