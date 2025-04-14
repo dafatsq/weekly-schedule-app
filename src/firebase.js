@@ -5,13 +5,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Your Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyBI4jlnbZMG0ckUR0qx9GkwS4VsJ3AGyGA",
-  authDomain: "weekly-schedule-f8982.firebaseapp.com",
-  projectId: "weekly-schedule-f8982",
-  storageBucket: "weekly-schedule-f8982.appspot.com",  // fixed typo here
-  messagingSenderId: "839992728946",
-  appId: "1:839992728946:web:e4136bbd55f88dc3b511eb",
-  measurementId: "G-WVZP5HLL1Y"
+  apiKey: "AIzaSyDsbCsHihXwT2lg0K1ELt11hVkabFz-f88",
+  authDomain: "tripmaster-4ef1b.firebaseapp.com",
+  projectId: "tripmaster-4ef1b",
+  storageBucket: "tripmaster-4ef1b.firebasestorage.app",
+  messagingSenderId: "722374270630",
+  appId: "1:722374270630:web:ad15bdf6ebb3c6ab8e5e67",
+  measurementId: "G-ESQHHXEW9Z"
 };
 
 // Initialize Firebase

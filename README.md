@@ -1,35 +1,34 @@
-# Weekly Schedule App
+# 🌴 TripMaster
 
-A dynamic web application for creating and managing your weekly schedule with a user-friendly drag-and-drop interface.
-
-![Weekly Schedule App Screenshot](https://drive.google.com/file/d/1by6Gjgr2pcmRlNzYPjzdJXFIAAFYxQbD/view?usp=drive_link)
+A comprehensive web application for managing vacation destinations, plans, users, and bookings with an intuitive interface.
 
 ## Features
 
-- **Interactive Schedule Grid**: Visualize your week with an easy-to-read grid layout
-- **Drag & Drop Tasks**: Easily move tasks between different days and times
-- **Task Duration**: Set tasks to span multiple hours with visual continuity
-- **Customizable Time Range**: Configure which hours appear in your schedule
-- **User Authentication**: Securely save your schedule with user accounts
-- **Responsive Design**: Works well on both desktop and mobile devices
+- **Destination Management**: Create and track beautiful destinations around the world
+- **Vacation Plans**: Design perfect vacation packages for your customers
+- **User Management**: Keep track of all your customers in one place
+- **Booking System**: Simple and efficient vacation booking management
+- **User Authentication**: Secure login and registration functionality
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **Dark Mode**: Toggle between light and dark themes for comfortable viewing
-- **User Profiles**: Upload and manage profile pictures
-- **Cloud Saving**: All your schedules are synced to the cloud automatically
+- **Profile Pictures**: Upload and manage user profile images
+- **Real-time Search**: Quickly find items across all management sections
+- **Cloud Storage**: All your data is securely stored and synced
 
 ## Technologies Used
 
 - React.js
 - Firebase Authentication
 - Firestore Database
-- React Beautiful DnD
 - CSS3 with responsive design
+- Modern JavaScript (ES6+)
 
 ## Installation
 
 1. Clone the repository:
    ```
-   git clone https://github.com/dafatsq/weekly-schedule-app.git
-   cd weekly-schedule
+   git clone https://github.com/dafatsq/tripmaster.git
+   cd tripmaster
    ```
 
 2. Install dependencies:
@@ -43,14 +42,24 @@ A dynamic web application for creating and managing your weekly schedule with a 
    - Enable Email/Password authentication
    - Create a Firestore database in production mode
 
-4. Create a `.env` file in the root directory with your Firebase config:
-   ```
-   REACT_APP_FIREBASE_API_KEY=your-api-key
-   REACT_APP_FIREBASE_AUTH_DOMAIN=your-auth-domain
-   REACT_APP_FIREBASE_PROJECT_ID=your-project-id
-   REACT_APP_FIREBASE_STORAGE_BUCKET=your-storage-bucket
-   REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
-   REACT_APP_FIREBASE_APP_ID=your-app-id
+4. Create a `firebase.js` file in the `src` directory with your Firebase config:
+   ```javascript
+   import { initializeApp } from "firebase/app";
+   import { getAuth } from "firebase/auth";
+   import { getFirestore } from "firebase/firestore";
+
+   const firebaseConfig = {
+     apiKey: "your-api-key",
+     authDomain: "your-auth-domain",
+     projectId: "your-project-id",
+     storageBucket: "your-storage-bucket",
+     messagingSenderId: "your-messaging-sender-id",
+     appId: "your-app-id"
+   };
+
+   const app = initializeApp(firebaseConfig);
+   export const auth = getAuth(app);
+   export const db = getFirestore(app);
    ```
 
 5. Start the development server:
@@ -61,36 +70,39 @@ A dynamic web application for creating and managing your weekly schedule with a 
 ## Usage
 
 1. **Create an account** or log in to an existing one
-2. **Add tasks** to your schedule by filling out the form at the top
-3. **Drag and drop** tasks to rearrange them on the schedule
-4. **Edit tasks** by clicking on them and using the edit form
-5. **Adjust the time range** shown using the Chart Settings
-6. **Upload a profile picture** by clicking on your profile avatar
-7. **Toggle dark mode** using the button in the sidebar
-
-## Configuration Options
-
-### Time Settings
-You can customize which hours are shown on your schedule grid by using the Chart Settings panel. This allows you to focus on specific parts of the day.
-
-### Task Duration
-When creating or editing a task, you can set its duration from 1 to 4 hours. The task will visually span across multiple time slots.
+2. Use the **sidebar navigation** to access different management sections:
+   - Manage Destinations
+   - Manage Vacation Plans
+   - Manage Users
+   - Manage Bookings
+3. In each section you can:
+   - **Search** for specific items
+   - **Add new** items through the form interface
+   - **Edit** existing items
+   - **Delete** items with confirmation
+4. Change your **profile picture** by clicking on your profile avatar
+5. Toggle **dark mode** using the button in the sidebar
+6. **Log out** by clicking on your profile and selecting Logout
 
 ## Data Structure
 
-The app uses Firebase Firestore with the following structure:
+The app uses Firebase Firestore with the following collections:
 
-- `schedules/{userId}` - Contains user's tasks and chart settings
-  - `tasks` - Array of task objects
-  - `chartStart` - Starting time setting
-  - `chartEnd` - Ending time setting
+- `destinations` - Contains destination information
+  - City, Price, Discount, Country, Rating, Quota, User ID
 
-- `users/{userId}` - Contains user profile data
-  - `profilePicture` - Base64 encoded profile image
+- `vacations` - Contains vacation package information
+  - City, Country, Price, Day Trip, Rating, Quota, User ID
+
+- `users` - Contains user profile data and customer information
+  - Name, Phone Number, Profile Picture, User ID
+
+- `bookings` - Contains booking records
+  - Name, Phone Number, Destination, Type, User ID
 
 ## Browser Support
 
-The app works best in modern browsers (Chrome, Firefox, Safari, Edge).
+The app works in all modern browsers (Chrome, Firefox, Safari, Edge) and is fully responsive for mobile devices.
 
 ## License
 

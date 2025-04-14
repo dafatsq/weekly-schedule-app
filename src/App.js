@@ -1,10 +1,10 @@
 import React from 'react';
-import WeeklySchedule from './WeeklySchedule';
+import TripMaster from './TripMaster';
 
 function App() {
   return (
     <div className="App">
-      <WeeklySchedule />
+      <TripMaster />
     </div>
   );
 }

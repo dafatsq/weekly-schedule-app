@@ -1138,3 +1138,231 @@
     background-color: #2563eb;
   }
 }
+
+/* TripMaster specific styles */
+.tripmaster-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #ebf8ff, #ffffff);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  position: relative;
+}
+
+.app-title {
+  margin: 50px 0 20px;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #1e40af;
+  text-align: center;
+}
+
+.main-content {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 20px;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  height: 42px;
+}
+
+/* Data Tables */
+.data-table-container {
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.data-table-container h2 {
+  padding: 15px 20px;
+  margin: 0;
+  background-color: #f3f4f6;
+  color: #1e40af;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background-color: #dbeafe;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.data-table tbody tr {
+  border-top: 1px solid #e5e7eb;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.data-table td {
+  padding: 12px 15px;
+  color: #4b5563;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-actions .btn {
+  padding: 5px 10px;
+  font-size: 0.85rem;
+}
+
+.no-data {
+  text-align: center;
+  color: #6b7280;
+  padding: 20px !important;
+}
+
+/* Form styling */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Load more button */
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.load-more-btn {
+  width: 200px;
+}
+
+/* Confirmation modal */
+.confirmation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.confirmation-modal {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 350px;
+  max-width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.confirmation-modal h3 {
+  margin-top: 0;
+  color: #1e40af;
+}
+
+.confirmation-modal p {
+  margin-bottom: 20px;
+  color: #4b5563;
+}
+
+.confirmation-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Dark Mode Styles for TripMaster */
+.dark-mode .tripmaster-wrapper {
+  background: linear-gradient(to bottom right, #1a202c, #2d3748);
+  color: #f7fafc;
+}
+
+.dark-mode .app-title {
+  color: #90cdf4;
+}
+
+.dark-mode .data-table-container {
+  background-color: #2d3748;
+}
+
+.dark-mode .data-table-container h2 {
+  background-color: #1a202c;
+  color: #90cdf4;
+  border-color: #4a5568;
+}
+
+.dark-mode .data-table thead {
+  background-color: #2c5282;
+}
+
+.dark-mode .data-table th {
+  color: #ebf8ff;
+}
+
+.dark-mode .data-table tbody tr {
+  border-color: #4a5568;
+}
+
+.dark-mode .data-table tbody tr:hover {
+  background-color: #2a4365;
+}
+
+.dark-mode .data-table td {
+  color: #e2e8f0;
+}
+
+.dark-mode .search-bar input {
+  background-color: #4a5568;
+  color: #f7fafc;
+  border-color: #2d3748;
+}
+
+.dark-mode .no-data {
+  color: #a0aec0;
+}
+
+.dark-mode .confirmation-modal {
+  background: #2d3748;
+}
+
+.dark-mode .confirmation-modal h3 {
+  color: #90cdf4;
+}
+
+.dark-mode .confirmation-modal p {
+  color: #e2e8f0;
+}
