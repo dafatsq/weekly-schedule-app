@@ -367,12 +367,18 @@ function WeeklySchedule() {
     setSelectedFile(null);
     setPreviewUrl(null);
     setUploadError('');
+    // Reset file input to ensure clean state
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setShowProfileUploadModal(true);
   }
   
   function handleFileSelect(event) {
     const file = event.target.files[0];
     handleFileValidation(file);
+    // Reset the input value to allow selecting the same file again
+    event.target.value = '';
   }
   
   function handleDragOver(event) {
@@ -399,12 +405,25 @@ function WeeklySchedule() {
   
   function handleFileValidation(file) {
     setUploadError('');
-    if (!file.type.match('image.*')) {
-      setUploadError('Please select an image file (PNG, JPG, JPEG, GIF)');
+    
+    if (!file) {
+      setUploadError('No file selected');
       return;
     }
+    
+    if (!file.type.match('image.*')) {
+      setUploadError('Please select an image file (PNG, JPG, JPEG, GIF)');
+      // Reset selected file and preview on validation error
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+    
     if (file.size > 2 * 1024 * 1024) {
       setUploadError('Image size should be less than 2MB');
+      // Reset selected file and preview on validation error
+      setSelectedFile(null);
+      setPreviewUrl(null);
       return;
     }
     
@@ -426,6 +445,13 @@ function WeeklySchedule() {
       const base64String = reader.result;
       saveProfilePicture(user.uid, base64String);
       setShowProfileUploadModal(false);
+      // Clean up after successful upload
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setUploadError('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     };
     reader.readAsDataURL(selectedFile);
   }
@@ -435,6 +461,10 @@ function WeeklySchedule() {
     setSelectedFile(null);
     setPreviewUrl(null);
     setUploadError('');
+    // Reset file input to ensure clean state for next use
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   useEffect(() => {
